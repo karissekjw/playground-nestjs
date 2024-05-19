@@ -1,4 +1,6 @@
-import { PrismaService } from "src/database/prisma.service";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { DuplicateRecordError } from "src/errors";
+import { PrismaService } from "../database/prisma.service";
 
 const prisma = new PrismaService()
 const modelMapping = {
@@ -7,22 +9,19 @@ const modelMapping = {
 
 export default class BaseRepository<T, CreateInput, UpdateInput> {
   protected model;
+  private modelName: string;
 
   constructor(modelName: keyof typeof modelMapping) {
+    this.modelName = modelName;
     this.model = modelMapping[modelName];
-    this.findMany = this.findMany.bind(this);
-    this.create = this.create.bind(this);
-    this.findById = this.findById.bind(this);
-    this.update = this.update.bind(this);
-    this.delete = this.delete.bind(this);
   }
 
   async findMany(): Promise<T[]>  {
-    return this.model.findMany();
+    return await this.model.findMany();
   }
 
   async findById(id: string): Promise<T | null> {
-    return this.model.findUnique({
+    return await this.model.findUnique({
       where: {
         id,
       },
@@ -30,11 +29,19 @@ export default class BaseRepository<T, CreateInput, UpdateInput> {
   }
 
   async create(data: CreateInput): Promise<T> {
-    return this.model.create({ data });
+    try {
+      return await this.model.create({ data });
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new DuplicateRecordError(`${this.modelName} already exists`);
+        }
+      }
+    }
   }
 
   async update(id: string, data: UpdateInput): Promise<T> {
-    return this.model.update({
+    return await this.model.update({
       where: { id },
       data: {
         ...data,
@@ -43,7 +50,7 @@ export default class BaseRepository<T, CreateInput, UpdateInput> {
   }
 
   async delete(id: string): Promise<T> {
-    return this.model.delete({
+    return await this.model.delete({
       where: { id },
     });
   }

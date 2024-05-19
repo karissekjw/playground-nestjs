@@ -1,19 +1,20 @@
-import { CreateUserDto } from '../dto/users.dto';
+import { CreateUserSchema } from '../schemas/users.schema';
 import { UsersRepository } from '../repository/users.repository';
 import { Injectable } from '@nestjs/common';
+import { UserEntity } from '../entities/user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(private repository: UsersRepository) {}
 
-  async create(params: CreateUserDto) {
-    const user = await this.repository.create(params);
+  create(params: CreateUserSchema): Promise<UserEntity> {
+    const user = this.repository.create(params);
 
     return user;
   }
 
-  async findOne(id: string) {
-    const user = await this.repository.findById(id);
+  findOne(id: string): Promise<UserEntity> {
+    const user = this.repository.findById(id);
 
     return user;
   }
