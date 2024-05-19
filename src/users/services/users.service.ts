@@ -7,13 +7,13 @@ export class UsersService {
   constructor(private repository: UsersRepository) {}
 
   async create(params: CreateUserDto) {
-    const user = await this.repository.create({ data: params });
+    const user = await this.repository.create(params);
 
     return user;
   }
 
   async findOne(id: string) {
-    const user = await this.repository.getById(id);
+    const user = await this.repository.findById(id);
 
     return user;
   }
