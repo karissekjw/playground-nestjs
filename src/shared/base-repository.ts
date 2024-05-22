@@ -1,5 +1,5 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { DuplicateRecordError } from "src/errors";
+import { DuplicateRecordError } from "./errors";
 import { PrismaService } from "../database/prisma.service";
 
 const prisma = new PrismaService()

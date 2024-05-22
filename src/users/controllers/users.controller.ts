@@ -3,7 +3,7 @@ import { Controller, Get, Post, Body, Param, NotFoundException, ConflictExceptio
 import { UsersService } from '../services/users.service';
 import { UserEntity } from '../entities/user.entity';
 import { ApiCreatedResponse } from '@nestjs/swagger';
-import { DuplicateRecordError } from 'src/errors';
+import { DuplicateRecordError } from '../../shared/errors';
 
 @Controller('users')
 export class UsersController {
@@ -14,7 +14,7 @@ export class UsersController {
   async create(@Body() createUser: CreateUserSchema) {
     try {
       const user = await this.usersService.create(createUser);
-      
+
       return new UserEntity(user);
     } catch(error) {
       if (error instanceof DuplicateRecordError) {
